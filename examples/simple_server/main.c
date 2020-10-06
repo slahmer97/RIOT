@@ -146,11 +146,12 @@ int main(void)
 
 #elif TYPE == 3
         mutex_lock(&my_struct_var.lock);
+
+        // if sem available, there would be no need for this
         if(my_struct_var.count == WORKERS_COUNT) {
             // do nothing
             // no thread is available
             printf("[-] No thread worker is available\n");
-            //can use a sem instead of this
             xtimer_sleep(1);
         }
         else {
@@ -162,7 +163,12 @@ int main(void)
                 my_struct_var.second_cell = 1;
 
             my_struct_var.count++;
-            /*rcv_pid = */thread_create(&rcv_thread_stack[cell][0], THREAD_STACKSIZE_MAIN,
+            /*
+             * if sem available
+             * the creation and destruction of threads each time could be avoided
+             * by using a global shared structure for storing data, and assigning them to the available thread
+             */
+            /*threads[free_index] = */thread_create(&rcv_thread_stack[cell][0], THREAD_STACKSIZE_MAIN,
                                         THREAD_PRIORITY_MAIN - 1, 0, rcv_thread, (void*)&meta_data_var[cell], "rcv");
 
         }
